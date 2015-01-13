@@ -1,0 +1,28 @@
+0|||16|||Now, the TC of HZ are all in, this is Guoqi, SS, and shushu, we are waiting for Rama|||2014-12-22 20:30:13
+16|||26|||He will be in around 9:30 EST|||2014-12-22 20:31:00
+26|||29|||ok, I see he is online right now. |||2014-12-22 20:31:22
+29|||45|||have u got my email? send around 10 minutes ago|||2014-12-22 20:34:14
+45|||68|||for now, our concern is that currently, our local tomcat connect to the remote DB, it's very slow, because tomcat will do a lot of query for connderiv startup.  so it's very very slow for us. |||2014-12-22 20:37:57
+68|||89|||also for the network is unstalbe, so caused it's hard for us to have the tomcat startup well|||2014-12-22 20:39:43
+89|||109|||I discuss this with Rama at 9:15, he mention that he will help me to setup DB in my local pc|||2014-12-22 20:41:18
+109|||120|||ok, yeah, I think it will be ?? will be faster for development|||2014-12-22 20:42:48
+120|||138|||HI Steve, this is SS, I think it's  ??, I mean is it possible we can have Rama to dump the database and send to us, ?? TC local|||2014-12-22 20:46:18
+138|||158|||may be Rama have better way, he say he will setup for me via OC, and I will share my screen. |||2014-12-22 20:47:44
+158|||196|||slience|||2014-12-22 20:48:51
+196|||210|||so reg the BRD question that you had, we can talk about tomorrow morning your time or ?? Rama ?? as well . |||2014-12-22 20:50:44
+210|||236|||Confusing|||2014-12-22 20:51:45
+236|||252|||Pardon, would u please repeat again? I think if you want to the questions you have in the BRD -- the Business Requirement Document. |||2014-12-22 20:55:17
+252|||267|||yeah, BRD, Kewell had sent u one mail, yeah, we can either  start talking them now or waiting for Rama, ?? discuss this tomorrow morning your time. |||2014-12-22 20:58:07
+267|||286|||I think , it's better to , we will have a meeting tomorrow morning, that may be your night, I think we can disccus by then.ok? sure, ok.  |||2014-12-22 20:59:56
+286|||325|||Slience|||2014-12-22 21:01:12
+325|||339|||HI, This is Rama, U??  HI , Rama, we are all here, including TC of HZ and Steve. ok. |||2014-12-22 21:02:20
+339|||362|||yeah, HI Steve, can u share your screen now? ok, I'm sharing.  so who ?? are on the line?  Shangsong and Shushu, Steve will do the requirement with me. |||2014-12-22 21:04:42
+362|||380|||Hello, Rama,  Hi Hi Hi, my ?? are all of you.  so ??, Flag, ?? to set the db, right?   |||2014-12-22 21:08:46
+380|||392|||yeah, ?? hold on ?? let me think about it. ??????|||2014-12-22 21:16:32
+392|||413|||you can hear?? right? I can hear you, that's good. |||2014-12-22 21:18:10
+413|||423|||for ?? again. ?? have the database setup locally. right. her?|||2014-12-22 21:20:51
+423|||442|||can you ?? me ??  copy the oracle 11g express??  ?? database ??|||2014-12-22 21:24:11
+442|||461|||Flag, you'd like to install 11g oracle for me ? or just dump the data file to me.  no, no , not dump, oracle ??|||2014-12-22 21:27:29
+461|||474|||?? we have a local oracle server, you have a local oracle database , right? yes|||2014-12-22 21:31:00
+474|||593|||  |||2014-12-22 21:30:15
+593|||1974|||  |||2014-12-22 20:28:36

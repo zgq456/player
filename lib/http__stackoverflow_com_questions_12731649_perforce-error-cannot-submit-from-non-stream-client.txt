@@ -1,0 +1,58 @@
+http://stackoverflow.com/questions/12731649/perforce-error-cannot-submit-from-non-stream-client
+
+Perforce error - cannot submit from non-stream client - Stack Overflow current community chat blog Stack Overflow Meta Stack Overflow Stack Overflow Careers your communities Sign up or log in to customize your list. more stack exchange communities Stack Exchange sign up log in tour help Tour Start here for a quick overview of the site Help Center Detailed answers to any questions you might have Meta Discuss the workings and policies of this site stack overflow careers Stack Overflow Questions Tags Users Badges Unanswered Ask Question Take the 2-minute tour × Stack Overflow is a question and answer site for professional and enthusiast programmers. It's 100% free, no registration required. Perforce error - cannot submit from non-stream client up vote 9 down vote favorite 2 Coming from GIT and SVN background, I've set up my P4V in windows, managed to get the content of my repository into my local folder (somehow), but once I made modification and create new files in my local folder, I cant submit it back to Perforce. It gives error: //depot/main/p4config.txt - warning: cannot submit from non-stream client No files to submit. Submit failed -- fix problems above then use 'p4 submit -c 6'. My depot hierarchy: C:\Perforce\kernelpanic\main>p4 client -S //depot/main -o
+# A Perforce Client Specification.
+#
+#  Client:      The client name.
+#  Update:      The date this specification was last modified.
+#  Access:      The date this client was last used in any way.
+#  Owner:       The user who created this client.
+#  Host:        If set, restricts access to the named host.
+#  Description: A short description of the client (optional).
+#  Root:        The base directory of the client workspace.
+#  AltRoots:    Up to two alternate client workspace roots.
+#  Options:     Client options:
+#                      [no]allwrite [no]clobber [no]compress
+#                      [un]locked [no]modtime [no]rmdir
+#  SubmitOptions:
+#                      submitunchanged/submitunchanged+reopen
+#                      revertunchanged/revertunchanged+reopen
+#                      leaveunchanged/leaveunchanged+reopen
+#  LineEnd:     Text file line endings on client: local/unix/mac/win/share.
+#  ServerID:    If set, restricts access to the named server.
+#  View:        Lines to map depot files into the client workspace.
+#  Stream:      The stream to which this client's view will be dedicated.
+#               (Files in stream paths can be submitted only by dedicated
+#               stream clients.) When this optional field is set, the
+#               View field will be automatically replaced by a stream
+#               view as the client spec is saved.
+#
+# Use 'p4 help client' to see more about client views and options.
+
+Client: kernelpanic
+
+Update: 2012/10/04 15:35:16
+
+Access: 2012/10/04 15:59:39
+
+Owner:  me.kernelpanic
+
+Host:   kernelpanic
+
+Description:
+        Created by me.kernelpanic.
+
+Root:   C:/Perforce/kernelpanic
+
+Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+
+SubmitOptions:  submitunchanged
+
+LineEnd:        local
+
+View:
+        //depot/... //kernelpanic/...
+        //depot/main/doc/... //kernelpanic/main/doc/...
+        //depot/* //kernelpanic/*
+        //depot/main/* //kernelpanic/main/*
+ If possible, I'd like to add the files in C:\Perforce\kernelpanic\main\src as well... Please help, I can't understand Perforce. I've tried doing a check out both before or after making modification, but both ways also failed to submit the change to server. I'd love to stick to GIT but our client is using Perforce so we have to play nice with them. Thanks a lot for your help! perforce share|improve this question asked Oct 4 '12 at 16:27 Zennichimaro 1,80421736      How are you trying to submit? From P4V or the command line? Where are your files locally? It looks like there are no files in the changelist you are trying to submit. –  ChrisF♦ Oct 4 '12 at 16:29      By the way, Perforce has just released 'Git Fusion', a new product that lets you clone a git repo for working on files stored in a Perforce server. And there's also git-p4. Either of these might let you stick with git, at least at your end. –  user1054341 Oct 4 '12 at 17:12      @ChrisF: I've tried both P4V and command line, both doesn't work. My problem is like the answer provided by user1054341. Sadly, I don't understand perforce and unable to figure things out –  Zennichimaro Oct 9 '12 at 2:44      @useruser1054341: Thanks a lot! I will give it a try! –  Zennichimaro Oct 9 '12 at 2:44 add a comment |  1 Answer 1 active oldest votes up vote 22 down vote accepted It's possible that P4V has guided you to create a stream depot and a mainline, but has somehow created a non-stream workspace for you. From what I've heard, that's likely to happen for first-time P4V users due to something in the setup. To see if that's the problem, go to Connection/Edit Workspace and look in the 'Stream' field. Is it empty? If so, use Browse to select the stream. This will turn your current workspace into a stream workspace. share|improve this answer answered Oct 4 '12 at 17:04 user1054341 1,457511      This sounds the more likely cause of the error. –  Dennis Oct 4 '12 at 20:48      Thanks a lot! This solve the problems, now all my changelists can be submitted! I really don't know about these workspace and stream thingy and have no idea to troubleshoot... Google also provide very little help.. really really appreciate your help.. –  Zennichimaro Oct 9 '12 at 2:47 add a comment |  Your Answer   draft saved draft discarded Sign up or log in Sign up using Google Sign up using Facebook Sign up using Stack Exchange Post as a guest Name Email required, but not shown Post as a guest Name Email required, but not shown discard By posting your answer, you agree to the privacy policy and terms of service. Not the answer you're looking for? Browse other questions tagged perforce or ask your own question. asked 2 years ago viewed 5306 times active 2 years ago Related 4 How to set defaults for perforce client specs 1 If I copy, modify, then submit a file in Perforce, will the copy still retain the original's history? 9 Perforce: How to resolve pending changes when files have been moved by another submitted change 0 Error in p4 submit of a file in a branch 0 Perforce: How to remap different Stream paths to same Workspace folder? 4 How to get the latest Perforce changelist in the depot for the current client spec 2 Get changes from the perforce 3 Perforce: moving unsubmitted changes to a different stream 0 Perforce: Cannot lock file error during a stream merge 1 What is the safest method to bring a perforce client in a clean state? Hot Network Questions Find the highest power of two in the expression. Name of a greek spice that sounds like "bakari" English word that means "a process that does not teach you anything"? What Is The Scale Of The Y Axis of The Histogram in Lightroom / ACR? What can you do with Lightroom catalog files if Adobe stops support for Lightroom? Redefining \toprule to default line thickness to use in tables What is a word for a character who incites the conflict in a plot? Does magical ammunition stack with a magical weapon? An example of a problem which is difficult but is made easier when a diagram is drawn Understanding the math tikzlibrary Q-Q plot and sample size Disable snapping for knife tool cut? Does using == in JavaScript ever make sense? replace stud that has vent pipe through it Is arrow notation for vectors "not mathematically mature"? Why does this test for Fibonacci work? Is there a word describing the first number in a multiplication? 10 Prisoners, 10 Keys, and 7 Years Why are primes considered to be the "building blocks" of the integers? Need tall QED symbol What could cause Earth to slowly fall out of orbit? Ways to parse JSON in LaTeX? How do we stabilise satellites so precisely? Is there a law that you can add or multiply to both sides of an equation? more hot questions question feed tour help blog chat data legal privacy policy work here advertising info mobile contact us feedback Technology Life / Arts Culture / Recreation Science Other Stack Overflow Server Fault Super User Web Applications Ask Ubuntu Webmasters Game Development TeX - LaTeX Programmers Unix & Linux Ask Different (Apple) WordPress Development Geographic Information Systems Electrical Engineering Android Enthusiasts Information Security Database Administrators Drupal Answers SharePoint User Experience Mathematica Salesforce more (14) Photography Science Fiction & Fantasy Graphic Design Seasoned Advice (cooking) Home Improvement Personal Finance & Money Academia more (10) English Language & Usage Skeptics Mi Yodeya (Judaism) Travel Christianity Arqade (gaming) Bicycles Role-playing Games more (21) Mathematics Cross Validated (stats) Theoretical Computer Science Physics MathOverflow more (7) Stack Apps Meta Stack Exchange Area 51 Stack Overflow Careers site design / logo © 2015 stack exchange inc; user contributions licensed under cc by-sa 3.0 with attribution required rev 2015.1.10.2163 Stack Overflow works best with JavaScript enabled

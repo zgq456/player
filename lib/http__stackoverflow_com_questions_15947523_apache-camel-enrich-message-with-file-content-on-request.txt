@@ -1,0 +1,79 @@
+http://stackoverflow.com/questions/15947523/apache-camel-enrich-message-with-file-content-on-request
+
+java - Apache Camel enrich message with file content on request - Stack Overflow current community chat blog Stack Overflow Meta Stack Overflow Stack Overflow Careers your communities Sign up or log in to customize your list. more stack exchange communities Stack Exchange sign up log in tour help Tour Start here for a quick overview of the site Help Center Detailed answers to any questions you might have Meta Discuss the workings and policies of this site stack overflow careers Stack Overflow Questions Tags Users Badges Unanswered Ask Question Take the 2-minute tour × Stack Overflow is a question and answer site for professional and enthusiast programmers. It's 100% free, no registration required. Apache Camel enrich message with file content on request up vote 4 down vote favorite 3 I'm implementing RESTful service (using CXFRS component) which should return files for some requests. Each file is fetched by its id and extension, i.e. restfulservice.com/path/file/1/pdf. Each file once added never changes. Files should not be moved or deleted after fetching and generally they should be accessible concurrently. Here is part of my Camel context: from("direct:fetchFile")
+    .process(fetchFileProcessor) // set file.id & file.extension
+    .bean(fileService, "fetchFile(${header.file.id}, ${header.file.extension})") // set body to filename
+    .setHeader("CamelFileName", simple("${body}"))
+    .choice()
+        .when(header("file.extension").isEqualTo("xml"))
+            .pollEnrich("file:///{{application.fileStorage.basePath}}/xml?noop=true", 500)
+        .when(header("file.extension").isEqualTo("pdf"))
+            .pollEnrich("file:///{{application.fileStorage.basePath}}/pdf?noop=true", 500)
+    .end()
+    .convertBodyTo(File.class)
+    .bean(responseProvider, "getResponse(${body}, 200)");
+ The problem with this configuration is that response has non-empty body only for second(why?) request, without timeout set service enters on eternal loop on second request with debug message DEBUG o.a.c.c.f.FileConsumer - Took 0.000 seconds to poll <base path>\xml
+ Apace Camel version is 2.10.4 Any help would be appreciated UPD1: There is warning on Content Enricher page, saying 'pollEnrich does not access any data from the current Exchange'. But nothing changes if I add fileName=${body} to file URL UPD2: It seems like pollEnrich do not support dynamic fileName specified in URL (link). Route at current moment: from("direct:fetchFile")
+    .process(fetchFileProcessor) // set file.id & file.extension
+    .bean(fileService, "fetchFile(${header.file.id}, ${header.file.extension})") // set body to filename
+    .choice()
+        .when(header("file.extension").isEqualTo("xml"))
+            .pollEnrich("file:///{{application.fileStorage.basePath}}/xml?fileName=${body}&noop=true", 500)
+            .setHeader("asset.type", simple(MediaType.APPLICATION_XML))
+        .when(header("file.extension").isEqualTo("pdf"))
+            .pollEnrich("file:///{{application.fileStorage.basePath}}/pdf?fileName=${body}&noop=true", 500)
+            .setHeader("asset.type", simple("application/pdf"))
+    .end()
+    .convertBodyTo(File.class)
+    .process(multipartProcessor) // add file ass attachment to multipart body and set it as body
+    .bean(responseProvider, "getResponse(${body}, 200)");
+ UPD3 I'm trying to to implement custom processor to use PollingConsumer with dynamic file names: @Override
+public void process(Exchange exchange) throws Exception {
+    Long timeout = exchange.getIn().getHeader("file.timeout", Long.class);
+    if (enrichUri == null) {
+        throw new FileNotFoundException("'file.url' header not set");
+    }
+
+    CamelContext context = exchange.getContext();
+    Endpoint endpoint = context.getEndpoint(enrichUri);
+    PollingConsumer consumer = endpoint.createPollingConsumer();
+    consumer.start();
+
+    Exchange consumedExchange;
+    try {
+        if (timeout == null || timeout < 0) {
+            consumedExchange = consumer.receive();
+        } else if (timeout == 0) {
+            consumedExchange = consumer.receiveNoWait();
+        } else {
+            consumedExchange = consumer.receive(timeout);
+        }
+    } catch (Exception e) {
+        throw new AssetNotFoundException(e);
+    } finally {
+        consumer.stop();
+    }
+    exchange.getIn().setBody(consumedExchange.getIn().getBody());
+}
+ Now it returns file contents on first response, but on each succeeding request I got eternal loop of above log messages: DEBUG o.a.c.c.f.FileConsumer - Took 0.000 seconds to poll <base path>\xml
+ UPD4 I've implemented dynamic route which is added before processing and removed after it. This method is described in this post in Apache Camel forum. Route uses above processor to consume file. The result is the same java rest java-ee cxf apache-camel share|improve this question edited Apr 15 '13 at 6:58 asked Apr 11 '13 at 11:24 nikagra 5481717 add a comment |  1 Answer 1 active oldest votes up vote 5 down vote accepted Simple way often is the best way. I refuse to deal with Apache Camel file component in this case and implemented following processor: public class FileLoadingProcessor implements Processor {
+
+@Override
+public void process(Exchange exchange) throws Exception {
+    String filename = exchange.getIn().getBody(String.class); // message body contains filename
+    String filePath = exchange.getIn().getHeader("fileprocessor.filepath", String.class);
+
+    if (filePath == null || filename == null) {
+        // throw some custom exception
+    }
+
+    URI uri = new URI(filePath.concat(filename));
+    File file = new File(uri);
+
+    if (!file.exists()) {
+        throw new FileNotFoundException(String.format("File %s not found on %s", filename, filePath));
+    }
+
+    exchange.getIn().setBody(file);
+}
+ Now it's working like a charm share|improve this answer answered Apr 15 '13 at 10:20 nikagra 5481717 add a comment |  Your Answer   draft saved draft discarded Sign up or log in Sign up using Google Sign up using Facebook Sign up using Stack Exchange Post as a guest Name Email required, but not shown Post as a guest Name Email required, but not shown discard By posting your answer, you agree to the privacy policy and terms of service. Not the answer you're looking for? Browse other questions tagged java rest java-ee cxf apache-camel or ask your own question. asked 1 year ago viewed 3265 times active 1 year ago Linked 0 How to call Rest API [XML Namespace] from Camel? Related 2 Camel Request/Reply Correlation 1 Apache Camel : Need advice for Routing 0 TypeConversion Exception : Apache Camel and CXF 0 Apache Camel : Control over route startup 0 copy related file with apache camel 0 How to access JSON request body of POST/PUT Request in Apache Camel/CXF REST webservice 2 Camel - content enricher: enrich() vs pollEnrich() 0 Apache Camel v2.12 | CXF Component | Basic Authentication 1 Apache camel (which EIP to use here?) aggregate/enrich all rows with repeating header data 1 Apache Camel: how to consume messages from two or more JMS queues Hot Network Questions Using DISTINCT in window function with OVER Can I use “what” instead of "which" in this sentence? How do teams prevent overwriting work? How to ensure users can't sign up for multiple accounts? How can a workplace rally after everyone's salary got leaked? Check whether array has only constant entries? Will my overstay in South Africa be noticed? Meaning of "She was a girl who for a ringing phone dropped exactly nothing" Pointer to array of unspecified size "(*p)[]" illegal in C++ but legal in C Name of a greek spice that sounds like "bakari" Debunking Stroustrup's debunking of the myth “C++ is for large, complicated, programs only” It's not a problem at all TO do that VS It's not a problem at all do that (without TO before do) Iron Sonic? Can’t find character or name What's the meaning of "first-page-first"? Find the highest power of two in the expression. what is the significance of selecting publication target when creating new mailing? ssh key persists even after I delete the private key from ~/.ssh -- why? English word that means "a process that does not teach you anything"? Is there a reason why someone shouldn't buy into a temporarily cheap currency of an otherwise solid economy? "waterway ... flowed sombre" - Should Joseph Conrad have used an adverb, not an adjective? Is it true that the Fibonacci sequence has the remainders when divided by 3 repeating? How does a capacitor smooth energy? Buying minifigure parts at the Lego Store Are there officially pronounced "no-go" Islamic zones in France? more hot questions question feed lang-java tour help blog chat data legal privacy policy work here advertising info mobile contact us feedback Technology Life / Arts Culture / Recreation Science Other Stack Overflow Server Fault Super User Web Applications Ask Ubuntu Webmasters Game Development TeX - LaTeX Programmers Unix & Linux Ask Different (Apple) WordPress Development Geographic Information Systems Electrical Engineering Android Enthusiasts Information Security Database Administrators Drupal Answers SharePoint User Experience Mathematica Salesforce more (14) Photography Science Fiction & Fantasy Graphic Design Seasoned Advice (cooking) Home Improvement Personal Finance & Money Academia more (10) English Language & Usage Skeptics Mi Yodeya (Judaism) Travel Christianity Arqade (gaming) Bicycles Role-playing Games more (21) Mathematics Cross Validated (stats) Theoretical Computer Science Physics MathOverflow more (7) Stack Apps Meta Stack Exchange Area 51 Stack Overflow Careers site design / logo © 2015 stack exchange inc; user contributions licensed under cc by-sa 3.0 with attribution required rev 2015.1.10.2163 Stack Overflow works best with JavaScript enabled

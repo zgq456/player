@@ -1,0 +1,30 @@
+0|||20|||Haha, Hi Ste2ve, so, you got the agenda, I think, right?|||2014-12-19 22:34:38
+1|||20|||  |||2014-12-22 17:44:27
+20|||25|||Ah, yes, ??aa|||2014-12-20 13:07:13
+25|||38|||And, yeah, I could see SS also reply with an update on the scheduled ??day|||2014-12-19 18:58:38
+38|||54|||so, before going through the agenda, do you want to talk about sth?|||2014-12-19 18:58:38
+54|||59|||Ah, yeah, first ?? the agenda|||2014-12-19 18:58:38
+59|||66|||so, the first item is the SD?? OCR reporting|||2014-12-19 18:58:39
+66|||67|||  |||2014-12-19 21:08:15
+67|||81|||for now, we believe we have completed the development on what we have for now, and.|||2014-12-19 18:58:39
+81|||99|||last Friday, we also have a meeting with GJ, and we verified on some remaining issue on that, and |||2014-12-19 18:58:39
+99|||104|||and currently, it is running on QA Deriv linux?? server?|||2014-12-19 22:08:05
+104|||117|||and, from everyday, at 7:00 GMT, we will reterive the RBS file, and generate that ?? file |||2014-12-19 22:19:29
+117|||136|||archive the outbound file into deriv connect server local folder, we will move that to uat deriv conn server, we will archive file to uat cysplor sftp server|||2014-12-19 22:22:34
+136|||147|||but, for now, we still have some other issue, maybe not issue, but, some are...,  something need confirmed.|||2014-12-19 22:36:51
+147|||169|||the RBS input file for UK file, we communicate it with the RBS team, and they told that they actually are not putting any file, similar to US, to the RBS ftp|||2014-12-19 22:40:54
+169|||181|||and seems like we actually don't have the input  for now, GJ said she will follow up on that. |||2014-12-19 22:43:21
+181|||196|||and as well for the 102b input , GJ also will talk with/about  ?? on that she said the input would be coming from the central data base|||2014-12-19 22:54:17
+196|||207|||so, do you have any comments on that? |||2014-12-21 16:21:33
+207|||216|||?? miss ??, what's not coming from SFTP? |||2014-12-21 16:23:20
+216|||229|||the 102A rbs input file for UK, for now, we have the input file for US, ok|||2014-12-21 16:24:03
+229|||247|||yeah, we send email to RBS asking what the UK filename, and what the timing they put that file onto RBS sftp|||2014-12-21 16:27:13
+247|||263|||they told that they haven't put anything related to, I mean, UK to the RBS sftp |||2014-12-21 16:30:02
+263|||286|||ok, yeah, Guoqi, you, ??, sorry, go ahead,  so for what to A?? deriv?? yeah, one ?? end of day, so just one file per day, right? for us and one for UK |||2014-12-21 16:36:22
+286|||292|||Ah, that's what GJ told me, but for UK , we are not sure. I mean because we|||2014-12-21 16:51:39
+292|||303|||because we didn't see the file, ok, do you konw how many files interday, ?? we could be ??|||2014-12-21 16:51:47
+303|||321|||I don't konw , how can I get that infomation, because in the sftp, every day there would be only one file, I mean, with that filename|||2014-12-21 17:03:06
+321|||345|||yeah, but interday  isn't coming from sftp, ok, ??another message, event drives, trigger the reporting ?? so, the ??|||2014-12-21 17:26:30
+345|||356|||do you have arc? requirement in interday as well? actually we...|||2014-12-21 17:28:35
+356|||472|||  |||2014-12-21 17:30:42
+472|||4701|||  |||2014-12-21 17:30:42

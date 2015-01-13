@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<title>Fight English</title>
+<style type="text/css">
+.btnPlay {
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	margin: 2px;
+}
+
+.btnSave {
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	margin: 2px;
+}
+
+.btnDelete {
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+}
+
+.btnEdit {
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+}
+
+.textareaText {
+	border: none;
+    width: 100%;
+    -webkit-box-sizing: border-box; /* <=iOS4, <= Android  2.3 */
+       -moz-box-sizing: border-box; /* FF1+ */
+            box-sizing: border-box; /* Chrome, IE8, Opera, Safari 5.1*/
+}
+
+div.ui-input-text { width: 90px !important;  }
+
+</style>
+</head>
+<body>
+	<div data-role="page" id="pageone"  >
+		<div data-role="header" style="width:100%; position: fixed;background: #2A3758;margin-left: auto;margin-right: auto;">
+			<center>
+			<!--audio 是HTML5中的新元素-->
+			<!-- 20141217Steve.mp3 controls显示那个播放器 autoplay歌曲就绪后自动播放 loop歌曲放完了循环-->
+			<audio controls id="currAudio" loop="false" style="height: 50px;">
+				<source id="audioSource" src="">
+				 <p>Your user agent does not support the HTML5 Audio element.</p>
+			</audio>
+			<div style="margin: 5px">
+				<input id="backBtn" type="button" value="back3s" data-inline="true" onclick="back()" />
+				&nbsp; <input id="forwardBtn" type="button" value="forward3s" data-inline="true"
+					onclick="forward()" /> <br/> Filename:<span id="filenameSpan"></span> Tip: ?? = unkonwn, #XXX# means not sure
+			</div>
+			
+			</center>
+		</div>
+
+		<div data-role="content" style="margin-top: 120px;">
+<!-- 		style="" -->
+			<div style="margin: 10px;display:none;" >
+				<label for="from">From</label>
+				<input type="text" id="from" name="from" /> 
+				<label for="to">to</label>
+				<input type="text" id="to" name="to" />
+				<input type="button" value="Search" onclick="doSearch()" />
+			</div>
+			<table id="tblData" style="width: 95%;border: 1px solid #cccccc; ">
+				<thead>
+					<tr>
+						<th width="10%">No.</th>
+						<th width="15%">Start</th>
+						<th width="15%">End</th>
+						<th width="40%">Text</th>
+						<th width="10%">Action</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		<div data-role="footer">
+			backend storge: 
+			<br/>
+			<input type="button" value="fetch" onclick="fetchRawText()" />
+			&nbsp;&nbsp;&nbsp;
+			<input type="button" value="download" onclick="downloadRawText()" />
+			&nbsp;&nbsp;&nbsp;
+			<span style="display: none;">
+				<input type="button" value="save" onclick="saveRawText()" />
+			</span>
+			<textarea id="rawTa" rows="30" cols="30"></textarea>
+		</div>
+	</div>
+</body>
+</html>
+
+
+
+<link rel="stylesheet"
+	href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css">
+<link rel="stylesheet"
+	href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="javascript/jquery-1.8.3.min.js"></script>
+<script src="javascript/jquery.mobile-1.3.2.min.js"></script>
+<script type="text/javascript" src="javascript/functions.js"></script>
+<script type="text/javascript" src="javascript/jquery-ui.js"></script>
+
