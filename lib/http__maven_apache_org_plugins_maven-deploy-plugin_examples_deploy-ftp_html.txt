@@ -1,0 +1,33 @@
+http://maven.apache.org/plugins/maven-deploy-plugin/examples/deploy-ftp.html
+
+Apache Maven Deploy Plugin - Deployment of artifacts with FTP Apache > Maven > Plugins > Apache Maven Deploy Plugin > Deployment of artifacts with FTP Last Published: 2014-08-27  | Version: 2.8.2 Overview Introduction Goals Usage FAQ Release Notes License Download Examples Project Deployment Deployment with FTP Deployment with external SSH File Deployment Project Documentation Project Information Project Reports Maven Projects Ant Tasks Archetype Doxia JXR Maven 1.x Maven 2 & 3 Parent POMs Plugins Plugin Tools SCM Shared Components Skins Surefire Wagon ASF How Apache Works Foundation Sponsoring Apache Thanks Deployment of artifacts with FTP In order to deploy artifacts using FTP you must first specify the use of an FTP server in the distributionManagement element of your POM as well as specifying an extension in your build element which will pull in the FTP artifacts required to deploy with FTP: <project>
+  ...
+  <distributionManagement>
+    <repository>
+      <id>ftp-repository</id>
+      <url>ftp://repository.mycompany.com/repository</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <extensions>
+      <!-- Enabling the use of FTP -->
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ftp</artifactId>
+         <version>1.0-beta-6</version>
+      </extension>
+    </extensions>
+  </build>
+  ...
+</project> Your settings.xml would contain a server element where the id of that element matches id of the FTP repository specified in the POM above: <settings>
+  ...
+  <servers>
+    <server>
+      <id>ftp-repository</id>
+      <username>user</username>
+      <password>pass</password>
+    </server>
+  </servers>
+  ...
+</settings> You should, of course, make sure that you can login into the specified FTP server by hand before attempting the deployment with Maven. Once you have verified that everything is setup correctly you can now deploy your artifacts using Maven: mvn deploy © 2004-2014 The Apache Software Foundation - Privacy Policy. Apache Maven, Maven, Apache, the Apache feather logo, and the Apache Maven project logos are trademarks of The Apache Software Foundation.

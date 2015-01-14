@@ -129,7 +129,7 @@ public class ParserUtil {
 					|| StringUtils.split(oneSen, "\\s+").length == 1) {
 				continue;
 			}
-			SentenBean sentenBean = new SentenBean(0, oneSen.toLowerCase(), 1);
+			SentenBean sentenBean = new SentenBean(0, oneSen.toLowerCase(), 1, "");
 			DBUtil.saveInfo(sentenBean);
 		}
 	}
@@ -206,8 +206,32 @@ public class ParserUtil {
 //				{ "", "http://stackoverflow.com/questions/15947523/apache-camel-enrich-message-with-file-content-on-request" },
 //				{ "", "http://www.lmi.net/support/using-a-publicprivate-key-pair-with-sshsftp" },
 //				{ "", "http://stackoverflow.com/questions/12731649/perforce-error-cannot-submit-from-non-stream-client" },
-				{ "", "https://docs.oracle.com/javase/tutorial/java/annotations/" },
-				{ "", "http://localhost:8080/player/raw/raw.txt" },
+//				{ "", "https://docs.oracle.com/javase/tutorial/java/annotations/" },
+//				{ "", "http://localhost:8080/player/raw/raw.txt" },
+				
+//				{ "", "http://stackoverflow.com/questions/3726357/why-does-ie9-switch-to-compatibility-mode-on-my-website " },
+//				{ "", "http://www.mkyong.com/java/access-restriction-the-type-base64encoder-is-not-accessible-due-to-restriction/ " },
+//				{ "", "http://www.rgagnon.com/javadetails/java-0613.html " },
+//				{ "", "http://mchr3k.github.io/org.intrace/ " },
+//				{ "", "http://blog.zvikico.com/2007/11/five-ways-for-t.html" },
+//				{ "", "http://www.wavesurfer.fm/" },
+//				{ "", "http://blog-tothought.rhcloud.com//post/2" },
+//				{ "", "http://mrbool.com/how-to-add-edit-and-delete-rows-of-a-html-table-with-jquery/26721" },
+//				{ "", "http://camel.apache.org/ftp2.html" },
+//				{ "", "http://stackoverflow.com/questions/1405979/using-maven-for-deployment" },
+//				{ "", "http://maven.apache.org/guides/introduction/introduction-to-profiles.html" },
+//				{ "", "http://stackoverflow.com/questions/3416573/how-can-i-display-a-message-in-maven" },
+//				{ "", "http://stackoverflow.com/questions/12412519/run-remote-command-via-ssh-using-maven3" },
+//				{ "", "http://maven.apache.org/plugins/maven-deploy-plugin/examples/deploy-ftp.html" },
+//				{ "", "http://www.adminschoice.com/crontab-quick-reference" },
+//				{ "", "http://camel.apache.org/file2" },
+//				{ "", "http://www.mkyong.com/java/how-to-compress-files-in-zip-format/" },
+//				{ "", "https://www.digitalocean.com/community/tutorials/how-to-use-sftp-to-securely-transfer-files-with-a-remote-server" },
+//				{ "", "https://docs.oseems.com/general/application/eclipse/fix-gc-overhead-limit-exceeded" },
+//				{ "", "https://wiki.jenkins-ci.org/display/JENKINS/Log+Parser+Plugin" },
+				{ "", "http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started" },
+				{ "", "" },
+				{ "", "" },
 				{ "", "" },
 				{ "", "" },
 				{ "", "" },

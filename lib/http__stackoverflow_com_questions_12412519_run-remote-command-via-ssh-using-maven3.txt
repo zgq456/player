@@ -1,0 +1,80 @@
+http://stackoverflow.com/questions/12412519/run-remote-command-via-ssh-using-maven3
+
+maven 3 - Run remote command via ssh using Maven3 - Stack Overflow current community chat blog Stack Overflow Meta Stack Overflow Stack Overflow Careers your communities Sign up or log in to customize your list. more stack exchange communities Stack Exchange sign up log in tour help Tour Start here for a quick overview of the site Help Center Detailed answers to any questions you might have Meta Discuss the workings and policies of this site stack overflow careers Stack Overflow Questions Tags Users Badges Unanswered Ask Question Take the 2-minute tour × Stack Overflow is a question and answer site for professional and enthusiast programmers. It's 100% free, no registration required. Run remote command via ssh using Maven3 up vote 3 down vote favorite I am using wagon-maven-plugin to scp my WAR file to the server. It works fine. My next step is to perform some commands on the server (mkdir, etc). Is there a plugin that helps me do that? Is there a way to work it out using wagon-maven-plugin? I am relatively new to mvn. Any help would be appreciated. Any suggestions? maven-3 maven-wagon-plugin share|improve this question asked Sep 13 '12 at 18:28 Dexter 435515 add a comment |  1 Answer 1 active oldest votes up vote 5 down vote accepted I was able to run ssh commands with exec-maven-plugin. It is a powerful maven plugin to do all sorts of hack and also run commands. For anyone interested in the solution <plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>exec-maven-plugin</artifactId>
+  <version>1.2.1</version>
+  <executions>
+    <execution>
+      <phase>install</phase>
+      <goals>
+        <goal>exec</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <executable>sh</executable>
+    <arguments>
+      <!-- Shell script location -->
+      <argument>runscript.sh</argument>
+      <!-- arg #1 -->
+      <argument>${file_1}</argument>
+    </arguments>
+  </configuration>
+</plugin>
+ Another solution I found was to run maven-antrun-plugin. I would not recommend it since it runs ANT tasks and there are a lot of dependencies to it. But its handy if you would need to run ant tasks via maven. <plugin>
+  <inherited>false</inherited>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-antrun-plugin</artifactId>
+  <version>1.6</version>
+  <configuration>
+    <target>
+      <loadproperties srcFile="deploy.properties" />
+      <ftp action="send" server="server"
+           remotedir="/a/b" userid="usr"
+           password="pw" depends="no"
+           verbose="yes" binary="yes">
+        <fileset dir="modules/my-module/target">
+          <include name="file.zip" />
+        </fileset>
+      </ftp>
+
+      <!-- calls deploy script -->
+      <sshexec host="host" trust="yes"
+               username="usr" password="pw"
+               command="sh /my/script.sh" />
+
+      <!-- SSH -->
+      <taskdef name="sshexec"
+               classname="org.apache.tools.ant.taskdefs.optional.ssh.SSHExec"
+               classpathref="maven.plugin.classpath" />
+      <taskdef name="ftp"
+               classname="org.apache.tools.ant.taskdefs.optional.net.FTP"
+               classpathref="maven.plugin.classpath" />
+    </target>
+  </configuration>
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>1.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>ant</groupId>
+      <artifactId>ant-commons-net</artifactId>
+      <version>1.6.5</version>
+    </dependency>
+    <dependency>
+      <groupId>ant</groupId>
+      <artifactId>ant-jsch</artifactId>
+      <version>1.6.5</version>
+    </dependency>
+    <dependency>
+      <groupId>jsch</groupId>
+      <artifactId>jsch</artifactId>
+      <version>0.1.29</version>
+    </dependency>
+  </dependencies>
+</plugin>
+ Hope that helps! share|improve this answer answered Sep 20 '12 at 2:28 Dexter 435515 add a comment |  Your Answer   draft saved draft discarded Sign up or log in Sign up using Google Sign up using Facebook Sign up using Stack Exchange Post as a guest Name Email required, but not shown Post as a guest Name Email required, but not shown discard By posting your answer, you agree to the privacy policy and terms of service. Not the answer you're looking for? Browse other questions tagged maven-3 maven-wagon-plugin or ask your own question. asked 2 years ago viewed 4085 times active 11 months ago Related 3 Maven Wagon plugin: Can wagon:upload upload to multiple locations? 0 Maven3 Issues with building a multi-module enterprise project 3 How to suppress/control logging of Wagon-FTP Maven extension? 2 Maven3 eclipse:eclipse does not work - Not running eclipse plugin goal for pom project 1 mvn deploy to AWS (ssh via distributionManagement) 1 What tools can I use to find out why maven3 searches for really old internal SNAPSHOTs? 2 maven3 - getting error on mvn dependency:tree command 0 How to install files via maven-wagon-ssh/scp on an ec2 instance? 0 maven-war-plugin not working with maven3, error for 'warSourceExcludes' attribute 0 Cannot download Google Play Services via Maven Hot Network Questions Ski Jumping Pairs? Where does Guardians of the Galaxy fit into the MCU timeline? How should I fill the "First name" and "Last name" in an application if I have two given names and two last names? How can you slice with string keys instead of integers on a python OrderedDict? Can AS numbers be reassigned? Completed Town Generator Are non-Muslims allowed to build snowmen in Saudi Arabia and similar countries? Code Golf Image Downloader What does 'aye' mean in this context? Is it true that the Fibonacci sequence has the remainders when divided by 3 repeating? Awk - output the second line of a number of .dat files to one file How to sleep in twins beds that are pushed together? What can be substituted for green onions when making crab cakes? Why are primes considered to be the "building blocks" of the integers? Drawing minimal xy axis Is there another simple way to append line to end of file other than `>>`? Have I referenced my website's SSL certificate chain correctly? Are there officially pronounced "no-go" Islamic zones in France? Why did Great Britain switch alliances to France? The longest run of at most k different elements in a list grep files from list Is it necessary for a journal submission to include the names of the authors' departments? Does cotton really kill? Rendering a Water Drop in Cycles more hot questions question feed tour help blog chat data legal privacy policy work here advertising info mobile contact us feedback Technology Life / Arts Culture / Recreation Science Other Stack Overflow Server Fault Super User Web Applications Ask Ubuntu Webmasters Game Development TeX - LaTeX Programmers Unix & Linux Ask Different (Apple) WordPress Development Geographic Information Systems Electrical Engineering Android Enthusiasts Information Security Database Administrators Drupal Answers SharePoint User Experience Mathematica Salesforce more (14) Photography Science Fiction & Fantasy Graphic Design Seasoned Advice (cooking) Home Improvement Personal Finance & Money Academia more (10) English Language & Usage Skeptics Mi Yodeya (Judaism) Travel Christianity Arqade (gaming) Bicycles Role-playing Games more (21) Mathematics Cross Validated (stats) Theoretical Computer Science Physics MathOverflow more (7) Stack Apps Meta Stack Exchange Area 51 Stack Overflow Careers site design / logo © 2015 stack exchange inc; user contributions licensed under cc by-sa 3.0 with attribution required rev 2015.1.13.2168 Stack Overflow works best with JavaScript enabled

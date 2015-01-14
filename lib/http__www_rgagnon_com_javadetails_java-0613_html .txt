@@ -1,0 +1,152 @@
+http://www.rgagnon.com/javadetails/java-0613.html 
+
+Read an Outlook MSG file - Real's Java How-to Real'sHowTo Custom Search Java Language String and Number Applet AWT Swing Environment IO Javascript interaction JDBC Thread Networking JSP & Servlet XML Internationalization Security JNI/JNA Date & Time Open Source Varia Deprecated Links Javascript & Web Language HTML & CSS Form Java interaction Mobile Varia Powerbuilder Powerscript Win API & Registry Datawindow PFC Common problems EAServer Database Links More HowTo WSH & VBScript Windows, Batch, PDF, Internet Links Varia Download Real's HowTo FAQ Contact me Donate! Funny 1 Funny 2 Funny 3 Funny 4 One line Deep Thoughts Ascii Art Big Index Latest Comments Read an Outlook MSG fileTag(s): Networking Open Source When Outlook Express saves an email, it uses the EML format which is a good thing because the format is a standard. You read them with Javamail easily, see this HowTo. But Outlook (not the Express but the one with Office) can only save an email with the MSG format which is Microsoft specific. Apache POI HSMF http://poi.apache.org/hsmf/ HSMF is the POI Project's pure Java implementation of the Outlook MSG format. This example takes a MSG file and extracts the attachment(s). POI 3.6 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.poi.hsmf.MAPIMessage;
+import org.apache.poi.hsmf.datatypes.AttachmentChunks;
+import org.apache.poi.hsmf.exceptions.ChunkNotFoundException;
+
+// You need poi-scratchpad-3.6  and poi-3.6 ( http://poi.apache.org/ )
+
+public class DetectMSGAttachment {
+  public static void main (String ... args) throws IOException {
+    String msgfile = "c:/temp/messagewithattachment.msg";
+    MAPIMessage msg = new MAPIMessage(msgfile);
+    Map attachmentMap = msg.getAttachmentFiles();
+    if(attachmentMap.size() > 0) {
+      for (Iterator ii = attachmentMap.entrySet().iterator(); ii.hasNext();) {
+        Map.Entry entry = (Map.Entry)ii.next();
+        String attachmentfilename = entry.getKey().toString();
+        System.out.println(attachmentfilename);
+
+        // extract attachment
+        ByteArrayInputStream fileIn = (ByteArrayInputStream)entry.getValue();
+        File f = new File("c:/temp", attachmentfilename); // output
+        OutputStream fileOut = null;
+        try {
+          fileOut = new FileOutputStream(f);
+          byte[] buffer = new byte[2048];
+          int bNum = fileIn.read(buffer);
+          while(bNum > 0) {
+            fileOut.write(buffer);
+            bNum = fileIn.read(buffer);
+          }
+        }
+        finally {
+          try {
+            if(fileIn != null) {
+              fileIn.close();
+            }
+          }
+          finally {
+            if(fileOut != null) {
+              fileOut.close();
+            }
+          }
+        }
+      }
+    }
+    else {
+      System.out.println("No attachment");
+    }
+  }
+}
+ POI 3.7 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.poi.hdgf.chunks.Chunk;
+import org.apache.poi.hsmf.MAPIMessage;
+import org.apache.poi.hsmf.datatypes.AttachmentChunks;
+import org.apache.poi.hsmf.datatypes.Chunks;
+import org.apache.poi.hsmf.exceptions.ChunkNotFoundException;
+
+// You need poi-scratchpad-3.7  and poi-3.7 ( http://poi.apache.org/ )
+public class DetectMSGAttachment {
+    public static void main (String ... args) throws IOException {
+        String msgfile = "c:/temp/messagewithattachment.msg";
+        MAPIMessage msg = new MAPIMessage(msgfile);
+        AttachmentChunks attachments[] = msg.getAttachmentFiles();
+        if(attachments.length > 0) {
+            for (AttachmentChunks a  : attachments) {
+                System.out.println(a.attachLongFileName);
+                // extract attachment
+                ByteArrayInputStream fileIn = new ByteArrayInputStream(a.attachData.getValue());
+                File f = new File("c:/temp", a.attachLongFileName.toString()); // output
+                OutputStream fileOut = null;
+                try {
+                    fileOut = new FileOutputStream(f);
+                    byte[] buffer = new byte[2048];
+                    int bNum = fileIn.read(buffer);
+                    while(bNum > 0) {
+                        fileOut.write(buffer);
+                        bNum = fileIn.read(buffer);
+                    }
+                }
+                finally {
+                    try {
+                        if(fileIn != null) {
+                            fileIn.close();
+                        }
+                    }
+                    finally {
+                        if(fileOut != null) {
+                            fileOut.close();
+                        }
+                    }
+                }
+            }
+        }
+        else {
+
+            System.out.println("No attachment");
+        }
+    }
+}
+ msgparser http://auxilii.com/msgparser/ msgparser is a small open source Java library that parses Outlook .msg files and provides their content using Java objects. msgparser uses the Apache POI - POIFS library to parse the message files which use the OLE 2 Compound Document format. 
+import java.util.List;
+import com.auxilii.msgparser.*;
+import com.auxilii.msgparser.attachment.*;
+
+public class SimpleMsgParser {
+  public static void main(String[] args) throws Exception{
+    MsgParser msgp = new MsgParser();
+    Message msg = msgp.parseMsg("c:/temp/test2.msg");
+
+    String fromEmail = msg.getFromEmail();
+    String fromName = msg.getFromName();
+    String subject = msg.getSubject();
+    String body = msg.getBodyText();
+
+    System.out.println("From :" + fromName + " <" + fromEmail + ">");
+    System.out.println("Subject :" + subject);
+    System.out.println("");
+    System.out.println(body);
+    System.out.println("");
+
+    List atts = msg.getAttachments();
+    for (Attachment att : atts) {
+      if (att instanceof FileAttachment) {
+        FileAttachment file = (FileAttachment) att;
+        System.out.println("Attachment : " + file.getFilename());
+        // you get the actual attachment with
+        // byte date[] = file.getData();
+      }
+    }
+  }
+}
+ jmbox https://jmbox.dev.java.net/ The jmbox project (read jambox) is a Local Store Provider for JavaMail, enabling developers to use JavaMail api to manage the mail stored in local repositories like Outlook Express, Mozilla, Netscape etc. At the moment are supported navigation and reading from Outlook Express 5/6 mail (dbx format). Please enable JavaScript to view the comments powered by Disqus. blog comments powered by Disqus If you find this article useful, consider making a small donation to show your support for this Web site and its content. Written and compiled by Réal Gagnon ©1998-2014 [ home ]

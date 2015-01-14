@@ -1,0 +1,226 @@
+http://stackoverflow.com/questions/1405979/using-maven-for-deployment
+
+Using Maven for deployment - Stack Overflow current community chat blog Stack Overflow Meta Stack Overflow Stack Overflow Careers your communities Sign up or log in to customize your list. more stack exchange communities Stack Exchange sign up log in tour help Tour Start here for a quick overview of the site Help Center Detailed answers to any questions you might have Meta Discuss the workings and policies of this site stack overflow careers Stack Overflow Questions Tags Users Badges Unanswered Ask Question Take the 2-minute tour × Stack Overflow is a question and answer site for professional and enthusiast programmers. It's 100% free, no registration required. Using Maven for deployment up vote 15 down vote favorite 5 I have this task for the project with 4 nested subprojects using Maven: For each child: jar-up resource directory including project dependencies Move up to the parent project With a single command extract all created archives into various remote destinations (full install), that may include http server, app server, file server, etc. (mostly *NIX). Destination is provided on subproject level It should also be possible to unzip/copy from the individual subproject (partial install) Files are not Java - mostly various scripts and HTML I'm looking at the various plugins to help with the task: assembly, dependency, antrun, unzip. Dependency looks promising but I need to unzip not only dependency jars but the (sub)project content as well. Also since I can't really tight the operation to the Maven lifecycle how would I trigger remote install? mvn dependency:unpack? That's not very descriptive or intuitive. Is is possible to create a custom goal (e.g. project:install) without writing a plugin? Using Maven is company standard so please do not offer alternatives - I'm pretty much stuck with what I have deployment maven-2 share|improve this question edited Sep 10 '09 at 16:41 Rich Seller 49.2k11115144 asked Sep 10 '09 at 15:23 Bostone 15.1k23116178 1   Ha ha. I wish I was "stuck" with Maven at my company. –  SingleShot Sep 10 '09 at 15:27      I didn't mean it in derogatory way :) –  Bostone Sep 10 '09 at 15:28      I don't understand what "Destination is provided on subproject level" means. Do you deliver all files to every destination? –  Rich Seller Sep 10 '09 at 15:31      4 subprojects. One deploys to http server, other 3 to one different fileserver each. The destination setting is provided in the child POM –  Bostone Sep 10 '09 at 15:35      So all files in one sub-project are delivered to the single destination –  Bostone Sep 10 '09 at 15:36  | show 8 more comments 4 Answers 4 active oldest votes up vote 10 down vote accepted Ok, I think the following might do what you need. The drawback of this approach is that there will be an interval between each deployment as the subsequent build is executed. Is this acceptable? Define a profile in each project with the same name (say "publish"). Within that profile you can define a configuration to use the antrun-plugin to deliver the files with FTP (see below). In the parent project you'll have a modules element, defining each project as a module. If you run mvn install -P publish, each project will be built in turn with the publish profile enabled, and the final artifact published to the target during the install phase. If you need to deploy additional files, modify the include element accordingly. Note the parameters for the FTP task have been set as properties, this allows them to be overridden from the command-line and/or inherited from the parent POM. <profiles>
+  <profile>
+    <id>publish</id>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-antrun-plugin</artifactId>
+      <executions>
+        <execution>
+          <id>ftp</id>
+          <phase>install</phase>
+          <configuration>
+            <tasks>
+              <ftp action="send" 
+                  server="${ftp.host}" remotedir="${ftp.remotedir}" 
+                  userid="${ftp.userid}" password="${ftp.password}" 
+                  depends="${ftp.depends}" verbose="${ftp.verbose}">
+                <fileset dir="${project.build.directory}">
+                  <include 
+                    name="${project.build.finalName}.${project.packaging}"/>
+                </fileset>
+              </ftp>
+            </tasks>
+          </configuration>
+          <goals>
+            <goal>run</goal>
+          </goals>
+        </execution>
+      </executions>
+      <dependencies>
+        <dependency>
+          <groupId>commons-net</groupId>
+          <artifactId>commons-net</artifactId>
+          <version>1.4.1</version>
+        </dependency>
+        <dependency>
+          <groupId>ant</groupId>
+          <artifactId>ant-commons-net</artifactId>
+          <version>1.6.5</version>
+        </dependency>
+        <dependency>
+          <groupId>ant</groupId>
+          <artifactId>ant-nodeps</artifactId>
+          <version>1.6.5</version>
+        </dependency>
+      </dependencies>
+    </plugin>
+    <properties>
+      <ftp.host>hostname</ftp.host>
+      <ftp.remotedir>/opt/path/to/install</ftp.remotedir>
+      <ftp.userid>user</ftp.userid>
+      <ftp.password>mypassword</ftp.password>
+      <ftp.depends>yes</ftp.depends>
+      <ftp.verbose>no</ftp.verbose>          
+    </properties>
+  </profile>
+</profiles>
+ Update: based on your comment: You could use the dependency plugin to download each dependency, except that a parent can't have a dependency on a child, and it will be built before the child. It would have to be another project. you also need to have somewhere the information for where to deploy them to. At the moment you have the target information in the individual projects so it isn't accessible in the deployer project. Taking this approach, you can define multiple profiles in the new project, one for each artifact. Each profile defines a dependency:copy execution to obtain the jar and an antrun execution for one of the projects. Common configuration (such as the dependencies for the antrun plugin) can be pulled out of the profiles. Also be aware that the properties will be merged if you define multiple profiles, so yo may need to qualify them with the artifact name, for example ftp.artifact1.host. <profiles>
+  <profile>
+    <id>deploy-artifact1</id>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <executions>
+        <execution>
+          <id>copy-dependency</id>
+          <phase>prepare-package</phase>
+          <goals>
+            <goal>copy</goal>
+          </goals>
+          <configuration>
+            <artifactItems>
+              <artifactItem>
+                <groupId>name.seller.rich</groupId>
+                <artifactId>artifact1</artifactId>
+                <version>1.0.0</version>
+                <type>jar</type>
+                <overWrite>false</overWrite>
+              </artifactItem>
+            </artifactItems>
+            <outputDirectory>${project.build.directory}/deploy-staging</outputDirectory>
+            <overWriteReleases>false</overWriteReleases>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-antrun-plugin</artifactId>
+      <executions>
+        <execution>
+          <id>ftp</id>
+          <phase>install</phase>
+          <configuration>
+            <tasks>
+              <ftp action="send" 
+                  server="${ftp.host}" remotedir="${ftp.remotedir}" 
+                  userid="${ftp.userid}" password="${ftp.password}" 
+                  depends="${ftp.depends}" verbose="${ftp.verbose}">
+                <fileset dir="${project.build.directory} includes="deploy-staging/"/>
+              </ftp>
+            </tasks>
+          </configuration>
+          <goals>
+            <goal>run</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    <properties>
+      <!--if the properties differ between targets, qualify them with the artifact name-->
+      <ftp.host>hostname</ftp.host>
+      <ftp.remotedir>/opt/path/to/install</ftp.remotedir>
+      <ftp.userid>user</ftp.userid>
+      <ftp.password>mypassword</ftp.password>
+      <ftp.depends>yes</ftp.depends>
+      <ftp.verbose>no</ftp.verbose>          
+    </properties>
+  </profile>
+</profiles>
+ share|improve this answer edited Sep 10 '09 at 17:33 answered Sep 10 '09 at 16:41 Rich Seller 49.2k11115144      This should work. The profile is what I've been missing all together. Here's another idea that should help with "hiccups" - instead of defining subprojects as modules define these as dependencies in the parent POM and extract artifact JARs to their destinations using dependency plugin. Will that work? –  Bostone Sep 10 '09 at 17:09      I forgot to mention that in our enterprise we use NAC to be able to map/access any server just as mapped directory (both Win/*NIX) so there's really no need for FTP or SSH –  Bostone Sep 10 '09 at 17:24      well in that case, the dependency-plugin's copy goal is all you need, just modify th outputDirectory property to the path of the target –  Rich Seller Sep 10 '09 at 17:45      Fantastic! Thanks for your time and advise Rich, once I'll finish doing what I'm doing I'll update the post, but I'm accepting your suggestion as a solution –  Bostone Sep 10 '09 at 19:26      Nothing like executing scripts using an XML - shorn scrotum :( –  AlikElzin-kilaka Dec 31 '14 at 9:16 add a comment |  up vote 0 down vote I would look at using the maven-assembly-plugin to do this. Something like this can be used to grab the files from the child projects and stuff them in output directories. <assembly>
+  <id>xyzzy</id>
+  <formats>
+   <format>zip</format>
+  </formats>
+  <fileSets>
+   <fileSet>
+      <directory>../subproject1/target/</directory>
+      <outputDirectory>/foo</outputDirectory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+   </fileSet>
+   <fileSet>
+      <directory>../subproject1/target/html-output/</directory>
+      <outputDirectory>/foo</outputDirectory>
+      <includes>
+        <include>*.html</include>
+        <include>*.js</include>
+        <include>*.css</include>
+      </includes>
+    </fileSet>     
+    <fileSet>
+      <directory>../subproject2/target/</directory>
+      <outputDirectory>/bar</outputDirectory>
+      <includes>
+        <include>**/**</include>
+      </includes>
+      <excludes>
+        <exclude>**/*.exclude-this</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets> 
+</assembly>
+ share|improve this answer answered Sep 10 '09 at 20:23 sal 8,89884069 1   As I understand - assembly plugin will create some sort of archive (jar, war, zip) - that doesn't work for me - I need actual files/folders to be copied to the destination. Actually - maven-dependency plugin seems to be better suitable since it can "unpack" but then I'm stuck since I cannot define subprojects both as modules and dependencies. So the route I'm going is actually after Rich's suggestions - define profile and copy files during install phase. –  Bostone Sep 10 '09 at 21:18      <format>dir</format> would create a directory –  sal Sep 10 '09 at 21:57 add a comment |  up vote 0 down vote Maven is not really designed to deploy jars to a remote location; its main use is compiling and packaging artifacts. The assembly and dependency targets are primarily used to gather dependencies and files to package into an artifact. Having said that, maven does have a deploy goal which uses a component called wagon. This is primarily intended to deploy to a maven repository. There is a plugin called Cargo that can be used to deploy artifacts to a remote server, but that doesn't explode the jar contents by itself (it relies on the target app server to do all that). You might be able to extend the Maven Wagon functionality yourself. Also, it is possible to package a custom lifecycle, but that is getting into some pretty low level maven mojo (pun intended). share|improve this answer answered Sep 10 '09 at 21:38 Ken Liu 8,35884173      I ended up using profiles and antrun - the best of both worlds! –  Bostone Sep 10 '09 at 22:06      great! I guess Antrun is the way to sidestep the whole Maven requirement ;) –  Ken Liu Sep 11 '09 at 0:27 add a comment |  up vote 0 down vote Does not work without passphrase.     <profile>
+        <id>publish</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>scp</id>
+                            <phase>deploy</phase>
+                            <configuration>
+                                <tasks>
+                                    <scp todir="user@host:some/remote/dir"
+                                         sftp="true"
+                                         keyfile="${user.home}/.ssh/devel-deploy.id_dsa"
+                                         failonerror="false"
+                                         verbose="true"
+                                         passphrase="nopass"
+                                    >
+                                        <fileset dir="${project.build.directory}">
+                                            <include
+                                                name="${project.build.finalName}.${project.packaging}"/>
+                                        </fileset>
+                                    </scp>
+                                </tasks>
+                            </configuration>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.ant</groupId>
+                            <artifactId>ant-jsch</artifactId>
+                            <version>1.9.4</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+ However, my favourite is     <profile>
+        <id>upload-devel</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>upload-devel</id>
+                            <phase>deploy</phase>
+                            <configuration>
+                                <target>
+                                    <exec executable="rsync" failonerror="false">
+                                        <arg value="-aiz" />
+                                        <arg value="${project.build.directory}/${project.artifactId}.${project.packaging}" />
+                                        <arg value="user@host:some/remote/dir/." />
+                                    </exec>
+                                </target>
+                            </configuration>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+ though I don't know how compatible that is over different platforms. share|improve this answer answered Jul 1 '14 at 12:08 user1050755 1,546921 add a comment |  Your Answer   draft saved draft discarded Sign up or log in Sign up using Google Sign up using Facebook Sign up using Stack Exchange Post as a guest Name Email required, but not shown Post as a guest Name Email required, but not shown discard By posting your answer, you agree to the privacy policy and terms of service. Not the answer you're looking for? Browse other questions tagged deployment maven-2 or ask your own question. asked 5 years ago viewed 12095 times active 6 months ago Linked 28 Maven copy local file to remote server using SSH 1 Ant SCP task not working - where as I am able to scp using cygwin 1 Deploying an assembly to a FTP server using Maven 2 0 Maven war upload using ftp Related 1 Maven dependency exclusion for War file, but inclusion for tests 2 Deploy Maven site using FTP Ant task 4 Maven build deployment 1 Deploying simple scala app(non-webapp) managed with maven 2 Maven, Java, and custom files for deployment 1 How to use hot deployment and development mode with jboss and gwt 1 Repeated password prompt with Maven deploy-file to scp repository 4 Maven - deploying large war files 2 maven: deploy dependencies to alternate repository 0 Maven Deployment on Multiple Containers Hot Network Questions Should you conform to journal formatting requirements for the initial submission? When can you use a skill if you're not trained? Is it necessary for a journal submission to include the names of the authors' departments? Which share icon is most appropriate for web? How to deal with an employee who ignores you Difference between "noise cancellation" and "noise reduction" Does cotton really kill? Bootstrap conceptual question, why should it work? Is it possible to align a caption to a centered float? Get a list of all countries and their states? Debunking Stroustrup's debunking of the myth “C++ is for large, complicated, programs only” What does 'aye' mean in this context? What is a formal equivalent of "get (a)round something"? Why does notation for functions seem to be abused and ambiguous? Does relativity allow one to say that the Sun revolves around the Earth? How much thrust is needed by an aircraft to have vertical Lift? Should I give honest (but bad) feedback about a colleague when asked by another team looking to hire him? What's the name of this manga whose cover has two handsome man? Is there an English idiom for trying to do two things at the same time and failing at both of them due to splitting your effort? Which filesystem do Android use? Why are primes considered to be the "building blocks" of the integers? Is there a law that you can add or multiply to both sides of an equation? What is the meaning of "since" in this sentence? How to deal with my 12 year old's rebellious behavior? more hot questions question feed default tour help blog chat data legal privacy policy work here advertising info mobile contact us feedback Technology Life / Arts Culture / Recreation Science Other Stack Overflow Server Fault Super User Web Applications Ask Ubuntu Webmasters Game Development TeX - LaTeX Programmers Unix & Linux Ask Different (Apple) WordPress Development Geographic Information Systems Electrical Engineering Android Enthusiasts Information Security Database Administrators Drupal Answers SharePoint User Experience Mathematica Salesforce more (14) Photography Science Fiction & Fantasy Graphic Design Seasoned Advice (cooking) Home Improvement Personal Finance & Money Academia more (10) English Language & Usage Skeptics Mi Yodeya (Judaism) Travel Christianity Arqade (gaming) Bicycles Role-playing Games more (21) Mathematics Cross Validated (stats) Theoretical Computer Science Physics MathOverflow more (7) Stack Apps Meta Stack Exchange Area 51 Stack Overflow Careers site design / logo © 2015 stack exchange inc; user contributions licensed under cc by-sa 3.0 with attribution required rev 2015.1.13.2168 Stack Overflow works best with JavaScript enabled

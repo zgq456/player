@@ -1,0 +1,15 @@
+http://www.wavesurfer.fm/
+
+wavesurfer.js Fill Scroll Normalize wavesurfer.js Backward Play / Pause Forward Toggle Mute Drag'n'drop your favorite -file here! Web Audio Waveform Visualizer Customizable waveform audio visualization built on top of Web Audio API and HTML5 Canvas. With wavesurfer.js you can create a cute HTML5 audio player or a sophisticated DJ application. Compatibility wavesurfer.js runs on modern browsers supporting Web Audio. Including Firefox, Chrome, Safari, Mobile Safari and Opera. Download Download wavesurfer.min.js (18 KB) Quick Start var wavesurfer = Object.create(WaveSurfer);
+
+wavesurfer.init({
+    container: document.querySelector('#wave'),
+    waveColor: 'violet',
+    progressColor: 'purple'
+});
+
+wavesurfer.on('ready', function () {
+    wavesurfer.play();
+});
+
+wavesurfer.load('example/media/demo.mp3'); Documentation The full list of options and methods can be found in README. Plugins & Examples Thanks to the everyting-is-public API, it's easy to write wavesurfer.js plugins. Regions plugin Adds ability to display and interact with audio regions. Regions are visual overlays that can be resized and dragged around the waveform. You can play back and loop a region. ELAN plugin Reads ELAN files and displays audio annotations as an interactive widget. ELAN is parsed into a JavaScript object with some denormalization. Timeline plugin Adds a nice simple timeline to your waveform. By Instajams. Microphone plugin Visualizes audio input from a microphone. By Thijs Triemstra. Panner Creating a panner with wavesurfer.js is easy-peasy. Follow the 4 steps. Equalizer Simple equalizer to demonstrate how to connect multiple filters in chain. Audio element HTML5 Audio element fallback for browsers without Web Audio. wavesurfer.js by katspaugh is licensed under a Creative Commons Attribution 3.0 Unported License. Demo music track is Trou by czskamaarù. Thanks! Fork me on GitHub

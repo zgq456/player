@@ -1,0 +1,146 @@
+http://www.mkyong.com/java/how-to-compress-files-in-zip-format/
+
+How to compress files in ZIP format Advertise Contact Us Write For Us RSS feed Donate Home All Tutorials Java Core Java Core Tutorials 1. Java I/O 2. Java XML 3. Java JSON 4. Java RegEx 5. JDBC 6. Java Misc JSF JSF Tutorials 1. JSF 2.0 Spring Spring Tutorials 1. Spring Core 2. Spring MVC 3. Spring Security 4. Spring MongoDB 5. Spring Batch Hibernate Hibernate Tutorials 1. Hibernate Core Struts Struts Tutorials 1. Struts 1 2. Struts 2 Android Android Tutorials 1. Android Core Others Apache Wicket JAX-WS (SOAP) JAX-RS (REST) Maven Google App Engine Java MongoDB jUnit TestNG jQuery Quartz Scheduler Log4j Logging How to compress files in ZIP format Posted on January 21, 2010 ,     Last modified : April 30, 2012 By mkyong Java comes with “java.util.zip” library to perform data compression in ZIp format. The overall concept is quite straightforward. Read file with “FileInputStream” Add the file name to “ZipEntry” and output it to “ZipOutputStream“ 1. Simple ZIP example Read a file “C:\\spy.log” and compress it into a zip file – “C:\\MyFile.zip“. package com.mkyong.zip;
+ 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+ 
+public class App 
+{	
+    public static void main( String[] args )
+    {
+    	byte[] buffer = new byte[1024];
+ 
+    	try{
+ 
+    		FileOutputStream fos = new FileOutputStream("C:\\MyFile.zip");
+    		ZipOutputStream zos = new ZipOutputStream(fos);
+    		ZipEntry ze= new ZipEntry("spy.log");
+    		zos.putNextEntry(ze);
+    		FileInputStream in = new FileInputStream("C:\\spy.log");
+ 
+    		int len;
+    		while ((len = in.read(buffer)) > 0) {
+    			zos.write(buffer, 0, len);
+    		}
+ 
+    		in.close();
+    		zos.closeEntry();
+ 
+    		//remember close it
+    		zos.close();
+ 
+    		System.out.println("Done");
+ 
+    	}catch(IOException ex){
+    	   ex.printStackTrace();
+    	}
+    }
+} 2. Advance ZIP example – Recursively Read all files from folder “C:\\testzip” and compress it into a zip file – “C:\\MyFile.zip“. It will recursively zip a directory as well. package com.mkyong.zip;
+ 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+ 
+public class AppZip
+{
+    List<String> fileList;
+    private static final String OUTPUT_ZIP_FILE = "C:\\MyFile.zip";
+    private static final String SOURCE_FOLDER = "C:\\testzip";
+ 
+    AppZip(){
+	fileList = new ArrayList<String>();
+    }
+ 
+    public static void main( String[] args )
+    {
+    	AppZip appZip = new AppZip();
+    	appZip.generateFileList(new File(SOURCE_FOLDER));
+    	appZip.zipIt(OUTPUT_ZIP_FILE);
+    }
+ 
+    /**
+     * Zip it
+     * @param zipFile output ZIP file location
+     */
+    public void zipIt(String zipFile){
+ 
+     byte[] buffer = new byte[1024];
+ 
+     try{
+ 
+    	FileOutputStream fos = new FileOutputStream(zipFile);
+    	ZipOutputStream zos = new ZipOutputStream(fos);
+ 
+    	System.out.println("Output to Zip : " + zipFile);
+ 
+    	for(String file : this.fileList){
+ 
+    		System.out.println("File Added : " + file);
+    		ZipEntry ze= new ZipEntry(file);
+        	zos.putNextEntry(ze);
+ 
+        	FileInputStream in = 
+                       new FileInputStream(SOURCE_FOLDER + File.separator + file);
+ 
+        	int len;
+        	while ((len = in.read(buffer)) > 0) {
+        		zos.write(buffer, 0, len);
+        	}
+ 
+        	in.close();
+    	}
+ 
+    	zos.closeEntry();
+    	//remember close it
+    	zos.close();
+ 
+    	System.out.println("Done");
+    }catch(IOException ex){
+       ex.printStackTrace();   
+    }
+   }
+ 
+    /**
+     * Traverse a directory and get all files,
+     * and add the file into fileList  
+     * @param node file or directory
+     */
+    public void generateFileList(File node){
+ 
+    	//add file only
+	if(node.isFile()){
+		fileList.add(generateZipEntry(node.getAbsoluteFile().toString()));
+	}
+ 
+	if(node.isDirectory()){
+		String[] subNote = node.list();
+		for(String filename : subNote){
+			generateFileList(new File(node, filename));
+		}
+	}
+ 
+    }
+ 
+    /**
+     * Format the file path for zip
+     * @param file file path
+     * @return Formatted file path
+     */
+    private String generateZipEntry(String file){
+    	return file.substring(SOURCE_FOLDER.length()+1, file.length());
+    }
+} Output Output to Zip : C:\MyFile.zip
+File Added : pdf\Java-Interview.pdf
+File Added : spy\log\spy.log
+File Added : utf-encoded.txt
+File Added : utf.txt
+Done Follow Up You may interest at this – How to decompress it from a Zip file Reference Compressing and Decompressing Data Using Java APIs Tags : io java zip mkyong Founder of Mkyong.com and HostingCompass.com, love Java and open source stuff. Follow him on Twitter, or befriend him on Facebook or Google Plus. If you like my tutorials, consider making a donation to this charity, thanks. Related Posts How to decompress files from a ZIP file How to read file in Java – FileInputStream How to convert InputStream to String in Java How to convert String to InputStream in Java How to get free disk space in Java Popular Posts Top 8 Java People You Should Know Top 20 Java Websites Top 5 Free Java eBooks Top 10 Java Regular Expression Examples Top 5 Open Source Q&A Systems You might also like following tutorials : Mohammad Hi, thank you a lot, But It Has A Problem!!! if we get it an empty folder, it will throw exception, and also, if we have an empty folder in another folder, it doesn’t create that empty folder! Praveen Hello Sir, I have a requirement where client can download all uploaded file from server. I have done downloading for single file. But i am not able to allow user to download all file at a single click Please Help me with this. all files are image file and i am suppose to zip it and allow download to user pc. Thank you Praveen Mohammed Amine Hi mkyong thank you for this section it is interesting but the code does not work it gives an empty archive :( http://deepakpk.users.sourceforge.net/ Deepak PK Sir your code made my app possible. thanks alot :) here is the link to my app : http://sourceforge.net/projects/zipbox/ Kruspe You are GOD ! Your site is one of the best tutorial’s sites ! You have done everting :-D http://javaapps.eu java apps Superb tutorial! You explained everything in a very simple way.helped a lot to a newbie like myself Dhanaprakash Superb.. Thanks a lot for sharing … It works Perfectly for me.. :) milan I am getting error on this code…..like main class not found please help me fast please …. :( Pingback: Java?????? | ???cn YoYo If i have a list of files, and i would like to rename it beofre zip it up, how could that be done?Can anyone advise? Many Thanks. Pingback: Compactar arquivo (ou texto) no formato zip com java | Desenvolvimento Web Jack Thanks very much for your helpful article! Andrew Thank You rajesh jogadulal es tarah program mat write kiya karo http://www.journaldev.com Pankaj The closeEntry() call should be inside the for loop in compressing directory. http://www.yahoo.com/ae6ac3aa6ab64b47512cd265c390b36f40501d17 site The design for the blog is a tad off in Epiphany. Nevertheless I like your website. I may need to use a normal web browser just to enjoy it. GuoTao Hi Yong, it’s necessary to considered that compressing directories which are empty in the example of ‘Advance ZIP example – Recursively’. thank you for sharing,I like the platform. sadanand Thank You, Mr Kong, U r simple a rock star… nagarjuna can u send me the program for created zip file is automatically send to mail through our gmail………. Give me reply to my mail [email protected] Khaled You can use Java mail to create an e-mail, attach that zip file and send it to that designated address. Pingback: Java I/O Tutorials Pingback: How to decompress files from a ZIP file | Java Recent Posts Ant and jUnit Task example Must include junit.jar if not in Ant's own classpath How to Apache Ant on Mac OS X Windows 8.1, black screen with movable cursor Java - Convert String to Enum object Popular Tutorials Android Tutorial JSF 2.0 Tutorial Spring Tutorial Maven Tutorial Hibernate Tutorial All Available Tutorials Java Core Technologies : Java I/O, Java RegEx, Java XML, Java JSON, JDBC, Java Misc J2EE Frameworks : Hibernate, JSF 2.0, Spring Core, Spring MVC, Spring Security, Spring MongoDB, Spring BatchApache Wicket, Struts 1.x, Struts 2.x Web Service : JAX-WS (SOAP), JAX-RS (REST) Build Tools : Maven, Archiva Unit Test Frameworks : jUnit, TestNG Others : Android, Google App Engine, jQuery, Java MongoDB, Quartz Scheduler, Log4j Favorites Links Android Getting Started Google App Engine - Java DZone - Fresh Links Official Java EE 5 Tutorial Official Java EE 6 Tutorial Official Java EE 7 Tutorial Spring 2.5.x documentation Spring 3.2.x documentation Spring Security 3.2.x documentation Hibernate core 4.3 documentation Java SE 6.0 API documentation JSP home page JSF home page Eclipse IDE for Java developer Struts 1.3.x documentation Struts 2.3.x documentation Maven home page Maven central repository Search Ant home page JAX-WS Official Website JAX-RS Official Website (Jersey) Friends & Links Java Code Geeks PHP Tutorials TenthOfMarch Web Security Blog Web Development Cédric Beust (TestNG) About Us Mkyong.com is a weblog dedicated to Java/J2EE developers and Web Developers. We constantly publish useful tricks, tutorials on J2EE or web development. All examples are simple, easy to read, and full source code available, and of course well tested in our development environment. We're Social Twitter - Follow Me Facebook - Like Me Google Plus - Add Me RSS - Subscribe Me Copyright © 2008-2014 Mkyong.com, all rights reserved.

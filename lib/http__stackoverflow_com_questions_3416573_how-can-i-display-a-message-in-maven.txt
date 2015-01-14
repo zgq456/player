@@ -1,0 +1,54 @@
+http://stackoverflow.com/questions/3416573/how-can-i-display-a-message-in-maven
+
+java - How can i display a message in Maven - Stack Overflow current community chat blog Stack Overflow Meta Stack Overflow Stack Overflow Careers your communities Sign up or log in to customize your list. more stack exchange communities Stack Exchange sign up log in tour help Tour Start here for a quick overview of the site Help Center Detailed answers to any questions you might have Meta Discuss the workings and policies of this site stack overflow careers Stack Overflow Questions Tags Users Badges Unanswered Ask Question Take the 2-minute tour × Stack Overflow is a question and answer site for professional and enthusiast programmers. It's 100% free, no registration required. How can i display a message in Maven up vote 15 down vote favorite How can i display a message in Maven? In ant, we do have "echo" to display a message, but in maven, how can i do that? java maven-2 share|improve this question edited Nov 18 '14 at 11:53 fnt 2,1591928 asked Aug 5 '10 at 15:52 David 46721129      Why do you need to do this? What is your use case? –  Pascal Thivent Aug 5 '10 at 16:28      code.google.com/p/echo-maven-plugin –  timomeinen Sep 10 '14 at 12:01 add a comment |  3 Answers 3 active oldest votes up vote 18 down vote You can use the antrun plugin: <plugin>
+    <artifactId>maven-antrun-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>generate-resources</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+            <configuration>
+                <tasks>
+                    <echo>Hello world!</echo>
+                </tasks>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+ One issue though is that you have to choose what phase of the build lifecycle to bind this to (my example has the plugin bound to generate-resources). Unlike Ant, you aren't controlling the lifecycle yourself, but rather just binding plugins to certain points in a pre-defined lifecycle. Depending on what you are actually trying to do, this may or may not make sense for your use case. share|improve this answer answered Aug 5 '10 at 15:56 matt b 77.3k30177248 add a comment |  up vote 1 down vote <plugin>
+    <artifactId>maven-antrun-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>generate-resources</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+            <configuration>
+                <tasks>
+                    <echo>[your message]:${Urkey}</echo>
+                </tasks>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+ share|improve this answer answered Jun 10 '13 at 8:41 Venkatesh Dayawar 1617 add a comment |  up vote 1 down vote You can use Groovy Maven Plugin for this. <plugin>                                                         
+    <groupId>org.codehaus.gmaven</groupId>                       
+    <artifactId>groovy-maven-plugin</artifactId>                 
+    <version>2.0</version>                                       
+    <executions>                                                 
+        <execution>                                              
+            <phase>validate</phase>                              
+            <goals>                                              
+                <goal>execute</goal>                             
+            </goals>                                             
+            <configuration>                                      
+                <source>                                         
+                    log.info('Test message: {}', 'Hello, World!')
+                </source>                                        
+            </configuration>                                     
+        </execution>                                             
+    </executions>                                                
+</plugin>                                                        
+ The configuration above will produce the following output: [INFO] Test message: Hello, World!
+ share|improve this answer answered Nov 18 '14 at 11:52 fnt 2,1591928 add a comment |  Your Answer   draft saved draft discarded Sign up or log in Sign up using Google Sign up using Facebook Sign up using Stack Exchange Post as a guest Name Email required, but not shown Post as a guest Name Email required, but not shown discard By posting your answer, you agree to the privacy policy and terms of service. Not the answer you're looking for? Browse other questions tagged java maven-2 or ask your own question. asked 4 years ago viewed 9970 times active 1 month ago Related 290 How do I tell Maven to use the latest version of a dependency? 457 Can I add jars to maven 2 build classpath without installing them? 784 How can I create an executable jar with dependencies using Maven? 11 How can I in a jsp page get maven project version number? 212 Get source JARs from Maven repository 2 How to add maven dependency 69 How to get Maven Artifact version at runtime? 13 How to use Maven in my Java Project and Why? 47 Why maven ? What are the benefits? 52 List all of the possible goals in Maven 2? Hot Network Questions Does memory gets slower if we increase the size? Do Salesforce developers use Git? How? How do I create a rectangle with an open corner in Adobe Illustrator? Rendering a Water Drop in Cycles Is it good to have multiple version of Linux Kernel? Where is the safest seat in the plane? Are non-Muslims allowed to build snowmen in Saudi Arabia and similar countries? Linq me a FizzBuzz How could Troi promote to rank Commander so easily and why didn't La Forge, Data and others do that? Constructor as a function try block - Exception aborts program Strap button screw length for acoustic guitar What is a formal equivalent of "get (a)round something"? Event System with multiple DLLs Which share icon is most appropriate for web? Is this textbook written in LaTeX? Is there an English idiom for trying to do two things at the same time and failing at both of them due to splitting your effort? Should you conform to journal formatting requirements for the initial submission? Debunking Stroustrup's debunking of the myth “C++ is for large, complicated, programs only” grep files from list Why are primes considered to be the "building blocks" of the integers? I developed an auto complete field and i want to save that field in controller.how can i do that? Do attack speed debuffs affect champions with auto-attack resets and auto-attack cancel spells? Who is "juergen" and why can I see the value of his exec-path? What about the areas without description in the Forgotten Realms? more hot questions question feed lang-java tour help blog chat data legal privacy policy work here advertising info mobile contact us feedback Technology Life / Arts Culture / Recreation Science Other Stack Overflow Server Fault Super User Web Applications Ask Ubuntu Webmasters Game Development TeX - LaTeX Programmers Unix & Linux Ask Different (Apple) WordPress Development Geographic Information Systems Electrical Engineering Android Enthusiasts Information Security Database Administrators Drupal Answers SharePoint User Experience Mathematica Salesforce more (14) Photography Science Fiction & Fantasy Graphic Design Seasoned Advice (cooking) Home Improvement Personal Finance & Money Academia more (10) English Language & Usage Skeptics Mi Yodeya (Judaism) Travel Christianity Arqade (gaming) Bicycles Role-playing Games more (21) Mathematics Cross Validated (stats) Theoretical Computer Science Physics MathOverflow more (7) Stack Apps Meta Stack Exchange Area 51 Stack Overflow Careers site design / logo © 2015 stack exchange inc; user contributions licensed under cc by-sa 3.0 with attribution required rev 2015.1.13.2168 Stack Overflow works best with JavaScript enabled

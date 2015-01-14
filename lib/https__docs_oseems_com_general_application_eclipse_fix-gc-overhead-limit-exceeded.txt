@@ -1,0 +1,25 @@
+https://docs.oseems.com/general/application/eclipse/fix-gc-overhead-limit-exceeded
+
+How to fix GC overhead limit exceeded in Eclipse osDocs Home Apps You are here: osDocs » General » Application » Eclipse » How to fix GC overhead limit exceeded in Eclipse How to fix GC overhead limit exceeded in Eclipse How to fix GC overhead limit exceeded in Eclipse Eclipse will throw GC overhead limit exceeded error when it runs out of memory, normally while performing memory-consuming operations such as building workspace on big projects. The error would look something like this; An internal error occurred during: "Building workspace".
+GC overhead limit exceeded To fix this problem, you'll need to allocate more memory to your Eclipse instance. To do this, locate the eclipse.ini file in your Eclipse's installation directory. The content would be something similar to the following; -startup
+plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar
+--launcher.library
+plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.200.v20140116-2212
+-product
+org.eclipse.epp.package.jee.product
+--launcher.defaultAction
+openFile
+-showsplash
+org.eclipse.platform
+--launcher.XXMaxPermSize
+256m
+--launcher.defaultAction
+openFile
+--launcher.appendVmargs
+-vmargs
+-Dosgi.requiredJavaVersion=1.6
+-XX:MaxPermSize=256m
+-Xms40m
+-Xmx512m
+ To increase the memory allocation for your Eclipse instance, edit the number in the following lines accordingly. -Xms512m
+-Xmx1024m These options are passed to Java when launching Eclipse. Xms specifies the initial memory allocation pool, and Xmx specifies maximum memory allocation pool for Java Virtual Machine (JVM). The number is the amount of memory, in Megabytes. You can also increase the value of MaxPermSize, as the following; -XX:MaxPermSize=1024m MaxPermSize or Permanent Generation defines the memory allocated to keep compiled class files. Restart Eclipse for the changes to take effect. Leave a tip if the article was useful. Thanks! Please enable JavaScript to view the comments powered by Disqus. comments powered by Disqus
